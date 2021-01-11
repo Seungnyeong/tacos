@@ -2,13 +2,27 @@ package com.ie.tacos.sample.domain;
 
 import lombok.Data;
 
+import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.CreditCardNumber;
-@Data
-public class Order {
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Data
+@Entity
+@Table( name = "Taco_Order")
+public class Order implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private Date placedAt;
     @NotBlank(message = "Name is required")
     private String deliveryName;
     @NotBlank(message = "Street is required")
@@ -25,4 +39,16 @@ public class Order {
     private String ccExpiration;
     @Digits(integer = 3, fraction = 0, message = "Invalid CVV")
     private String ccCVV;
+
+    @ManyToMany(targetEntity = Taco.class)
+    private List<Taco> tacos = new ArrayList<>();
+
+    @PrePersist
+    void placedAt() {
+        this.placedAt = new Date();
+    }
+
+    public void addDesign(Taco design) {
+        this.tacos.add(design);
+    }
 }
